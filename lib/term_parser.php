@@ -42,9 +42,10 @@ function erl_parse_list($string, $i){
     $list = array();
     $len = strlen($string);
     while($i < $len){
-	$l = $string[$i];
+	$l = $string[$i]; // letter
+	$n = $string[$i+1]; // next letter
 	switch(true){
-	case $l === '[' && !$sb_started && $string[$i+1] === ']':
+	case $l === '[' && !$sb_started && $n === ']':
 	    $sb_started = true;
 	    break;
 	case $l === '[' && !$sb_started:
@@ -71,7 +72,11 @@ function erl_parse_term($string, $i){
     $len = strlen($string);
     while($i < $len){
 	$l = $string[$i];
+	$n = $string[$i+1];
 	switch(true){
+	case $l === '{' && !$started && $n === '}':
+	    $started = true;
+	    break;
 	case $l === '{' && !$started:
 	    list($list[], $i) = erl_parse_all($string, $i+1);
 	    $started = true;
