@@ -23,6 +23,9 @@ function erl_parse_all($string, $i){
 	case $l === '{': // term
 	    return erl_parse_term($string, $i);
 	    break;
+	case $l === '<': // pid
+	    return erl_parse_pid($string, $i);
+	    break;
 	case false !== strpos(erl_config('atom_string'), $l):
 	    return erl_parse_atom($string, $i);
 	    break;
@@ -129,6 +132,15 @@ function erl_parse_number($string, $i){
 	$i++;
     }
 }
+
+function erl_parse_pid($string, $i){
+    $out = array();
+    if(!preg_match_all("/^<[0-9]+\.[0-9]+\.[0-9]+>/",substr($string, $i), $out)){
+	    throw new Exception("Unexpected symbol $l in $i");
+    }
+    return array(array('type'=>'pid', 'data'=>$out[0][0]), $i+strlen($out[0][0])-1);
+}
+
 
 
 function erl_list2string($node){
