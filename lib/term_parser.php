@@ -153,9 +153,5 @@ function erl_list2string($node){
     return $node;
 }
 
-$term_string = '{[],{},[{}],[1],[a],[1,2],[1,2,3]}';
-list($result, $offset) = erl_parse_all($term_string, 0);
-print_r(erl_list2string($result));
-
 
 
