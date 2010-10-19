@@ -90,7 +90,7 @@ function erl_parse_quoted_list($string, $i){
     	    break;
     	case $l === '"' && $escape:
 	    case $l === "\\" && $escape:
-            $list[] = array('type'=>'number', 'data'=>ord($l));
+            $list[] = ord($l);
             $escape = false;
             break;
         case $l === '"' && $started:
@@ -98,7 +98,7 @@ function erl_parse_quoted_list($string, $i){
             var_dump($list);
     	    break;
         default:
-            $list[] = array('type'=>'number', 'data'=>ord($l));
+            $list[] = ord($l);
             $escape = false;
     	    break;
     	}
@@ -166,7 +166,7 @@ function erl_parse_number($string, $i){
     $float = (float)$out[0][0];
     $int   = (int)$out[0][0];
     $result = ((float)$int === $float) ? $int : $float;
-    return array(array('type'=>'number', 'data'=>$result), $i+strlen($out[0][0])-1);
+    return array($result, $i+strlen($out[0][0])-1);
 }
 
 function erl_parse_pid($string, $i){

@@ -12,7 +12,7 @@ $tests = array(
                 array('type' => 'list',  'data' => array()),
                 array('type' => 'tuple', 'data' => array()),
                 array('type' => 'list',  'data' => array( array( 'type' => 'tuple',  'data' => array()))),
-                array('type' => 'list',  'data' => array( array( 'type' => 'number', 'data' => 48))),
+                array('type' => 'list',  'data' => array(48) ),
                 array('type' => 'list',  'data' => array( array( 'type' => 'atom',   'data' => 'a'))),
                 array('type' => 'pid',   'data' => '<11.22.33>'),
                 ),
@@ -23,12 +23,7 @@ $tests = array(
         'source' => '[48, -49, 1.2, 1.2e3]',
         'result' => array(
             'type' => 'list', 
-            'data' => array(
-                array('type' => 'number',  'data' => 48),
-                array('type' => 'number',  'data' => -49),
-                array('type' => 'number',  'data' => 1.2),
-                array('type' => 'number',  'data' => 1.2e3),
-                ),
+            'data' => array( 48, -49, 1.2, 1.2e3 ),
             ),
         ),
     'lists' => array(
@@ -39,11 +34,7 @@ $tests = array(
             'data' => array(
                 array('type' => 'list',  'data' => array()),
                 array('type' => 'list',  'data' => array()),
-                array('type' => 'list',  'data' => array(
-                    array('type' => 'number',  'data' => 48),
-                    array('type' => 'number',  'data' => 49),
-                    array('type' => 'number',  'data' => 50),
-                )),
+                array('type' => 'list',  'data' => array(48,49,50)),
                 ),
             ),
         ),
