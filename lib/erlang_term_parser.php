@@ -13,31 +13,35 @@ function _log($string){
 function erl_parse_all($string, $i){
     $len = strlen($string);
     while($i < $len){
-	$l = $string[$i];
-	switch(true){
-	case in_array($l, array(' ', "\n")): // stuff
-	    break;
-	case $l === '[': // list
-	    return erl_parse_list($string, $i);
-	    break;
-	case $l === '{': // tuple
-	    return erl_parse_tuple($string, $i);
-	    break;
-	case $l === '<': // pid
-	    return erl_parse_pid($string, $i);
-	    break;
-	case false !== strpos(erl_config('atom_string'), $l):
-	    return erl_parse_atom($string, $i);
-	    break;
-	case false !== strpos(erl_config('number_string'), $l):
-	    return erl_parse_number($string, $i);
-	    break;
-	default:
-	    throw new Exception("Unexpected symbol $l in $i");
-	    break;
-	}
-	$i++;
+    	$l = $string[$i];
+    	switch(true){
+    	case in_array($l, array(' ', "\n")): // stuff
+    	    break;
+    	case $l === '[': // list
+    	    return erl_parse_list($string, $i);
+    	    break;
+    	case $l === '"': // quoted_list
+    	    return erl_parse_quoted_list($string, $i);
+    	    break;
+    	case $l === '{': // tuple
+    	    return erl_parse_tuple($string, $i);
+    	    break;
+    	case $l === '<': // pid
+    	    return erl_parse_pid($string, $i);
+    	    break;
+    	case false !== strpos(erl_config('atom_string'), $l):
+    	    return erl_parse_atom($string, $i);
+    	    break;
+    	case false !== strpos(erl_config('number_string'), $l):
+    	    return erl_parse_number($string, $i);
+    	    break;
+    	default:
+    	    throw new Exception("Unexpected symbol $l in $i");
+    	    break;
+       	}
+    	$i++;
     }
+    throw new Exception("Error while parsing term");
 }
 
 function erl_parse_list($string, $i){
@@ -45,28 +49,62 @@ function erl_parse_list($string, $i){
     $list = array();
     $len = strlen($string);
     while($i < $len){
-	$l = $string[$i]; // letter
-	$n = $string[$i+1]; // next letter
-	switch(true){
-	case $l === '[' && !$sb_started && $n === ']':
-	    $sb_started = true;
-	    break;
-	case $l === '[' && !$sb_started:
-	    $sb_started = true;
-	    list($list[], $i) = erl_parse_all($string, $i+1);
-	    continue;
-	case $l === ',':
-	    list($list[], $i) = erl_parse_all($string, $i+1);
-	    continue;
-	case $l === ']' && $sb_started:
-	    return array(array('type'=>'list', 'data'=>$list), $i);
-	    break;
-	default:
-	    throw new Exception("Unexpected symbol $l in $i");
-	    break;
-	}
-	$i++;
+	    $l = $string[$i]; // letter
+    	$n = ($i+1) < $len ? $string[$i+1] : false; // next letter
+    	switch(true){
+    	case $l === '[' && !$sb_started && $n === ']':
+    	    $sb_started = true;
+    	    break;
+    	case $l === '[' && !$sb_started :
+    	    $sb_started = true;
+    	    list($list[], $i) = erl_parse_all($string, $i+1);
+    	    continue;
+    	case $l === ',':
+    	    list($list[], $i) = erl_parse_all($string, $i+1);
+    	    continue;
+    	case $l === ']' && $sb_started:
+    	    return array(array('type'=>'list', 'data'=>$list), $i);
+    	    break;
+    	default:
+    	    throw new Exception("Unexpected symbol $l in $i");
+    	    break;
+    	}
+    	$i++;
     }
+    throw new Exception("Error while parsing list");
+}
+
+function erl_parse_quoted_list($string, $i){
+    $started  = false;
+    $escape = false;
+    $list  = array();
+    $len   = strlen($string);
+    while($i < $len){
+	    $l = $string[$i]; // letter
+    	switch(true){
+    	case $l === '"' && !$started:
+    	    $started = true;
+    	    break;
+    	case $l === "\\" && !$escape:
+    	    $escape = true;
+    	    break;
+    	case $l === '"' && $escape:
+	    case $l === "\\" && $escape:
+            $list[] = array('type'=>'number', 'data'=>ord($l));
+            $escape = false;
+            break;
+        case $l === '"' && $started:
+    	    return array(array('type'=>'list', 'data'=>$list), $i);
+            var_dump($list);
+    	    break;
+        default:
+            $list[] = array('type'=>'number', 'data'=>ord($l));
+            $escape = false;
+    	    break;
+    	}
+	    $i++;
+    }
+    throw new Exception("Error while parsing quoted list");
 }
 
 function erl_parse_tuple($string, $i){
@@ -74,45 +112,47 @@ function erl_parse_tuple($string, $i){
     $list = array();
     $len = strlen($string);
     while($i < $len){
-	$l = $string[$i];
-	$n = $string[$i+1];
-	switch(true){
-	case $l === '{' && !$started && $n === '}':
-	    $started = true;
-	    break;
-	case $l === '{' && !$started:
-	    list($list[], $i) = erl_parse_all($string, $i+1);
-	    $started = true;
-	    continue;
-	case $l === ',':
-	    list($list[], $i) = erl_parse_all($string, $i+1);
-	    continue;
-	case $l === '}' && $started:
-	    return array(array('type'=>'tuple', 'data'=>$list), $i);
-	    break;
-	default:
-	    throw new Exception("Unexpected symbol $l in $i");
-	    break;
-	}
-	$i++;
+    	$l = $string[$i];
+    	$n = ($i+1) < $len ? $string[$i+1] : false; // next letter
+    	switch(true){
+       	case $l === '{' && !$started && $n === '}':
+    	    $started = true;
+    	    break;
+        case $l === '{' && !$started:
+    	    list($list[], $i) = erl_parse_all($string, $i+1);
+    	    $started = true;
+    	    continue;
+    	case $l === ',':
+    	    list($list[], $i) = erl_parse_all($string, $i+1);
+            continue;
+    	case $l === '}' && $started:
+    	    return array(array('type'=>'tuple', 'data'=>$list), $i);
+    	    break;
+    	default:
+    	    throw new Exception("Unexpected symbol $l in $i");
+    	    break;
+	    }
+    	$i++;
     }
+    throw new Exception("Error while parsing tuple");
 }
 
 function erl_parse_atom($string, $i){
     $atom = '';
     $len = strlen($string);
     while($i < $len){
-	$l = $string[$i];
-	switch(true){
-	case false !== strpos(erl_config('atom_string'), $l):
-	    $atom .= $l;
-	    break;
-	default:
-	    return array(array('type'=>'atom', 'data'=>$atom), $i-1);
-	    break;
-	}
-	$i++;
+    	$l = $string[$i];
+    	switch(true){
+    	case false !== strpos(erl_config('atom_string'), $l):
+    	    $atom .= $l;
+    	    break;
+    	default:
+    	    return array(array('type'=>'atom', 'data'=>$atom), $i-1);
+    	    break;
+    	}
+	    $i++;
     }
+    throw new Exception("Error while parsing quoted atom");
 }
 
 
