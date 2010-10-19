@@ -190,13 +190,12 @@ function erl_list2string($node){
 	$is_string = true;
 	$possible_string = '';
 	foreach($node['data'] as $subnode){
-	    if($is_string = $is_string && $subnode['type'] === 'number' && $subnode['data'] > 0 && $subnode['data'] < 256){
-	        $possible_string .= chr($subnode['data']);
+	    if($is_string = $is_string && is_int($subnode) && $subnode > 0 && $subnode < 256){
+	        $possible_string .= chr($subnode);
 	    }
 	}
 	if($is_string){
-	    $node['type'] = 'string';
-	    $node['data'] = $possible_string;
+	    $node = $possible_string;
 	} else {
 	    $new_data = array();
 	    foreach($node['data'] as $subnode) $new_data[] = erl_list2string($subnode);
