@@ -1,7 +1,8 @@
 <?php
+// includeing library
 require_once('lib/erlang_term_parser.php');
 
-
+// tests
 $tests = array(
     'basic' => array(
         'type'   => 'simple',
@@ -49,13 +50,13 @@ $tests = array(
         'source' => '{[],"0","123"}',
         'result' => array(
             'type' => 'tuple',
-            'data' => array('', '0', '123')
+            'data' => array( array('type' => 'list', 'data' => array()), '0', '123')
             ) 
         ),
     );
 
 
-
+// make tests
 foreach($tests as $name => $test){
     if($test['type'] === 'list2string'){
         echo "Test [$name] ... ";
