@@ -2,7 +2,7 @@
 
 function erl_config($param){
     if($param === 'atom_string') return '_abcdefghijklmnopqrstuvwxyz';
-    if($param === 'number_string') return '0123456789';
+    if($param === 'number_string') return '-0123456789.';
     return false;
 }
 
@@ -117,26 +117,22 @@ function erl_parse_atom($string, $i){
 
 
 function erl_parse_number($string, $i){
-    $number = '';
-    $len = strlen($string);
-    while($i < $len){
-	$l = $string[$i];
-	switch(true){
-	case false !== strpos(erl_config('number_string'), $l):
-	    $number = $number*10 + $l;
-	    break;
-	default:
-	    return array(array('type'=>'number', 'data'=>$number), $i-1);
-	    break;
-	}
-	$i++;
+    $substr = substr($string, $i);
+    $number_regexp = '/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/';
+    $out = array();
+    if(!preg_match_all($number_regexp, substr($string, $i), $out)){
+	    throw new Exception("Unexpected sequence in $i");
     }
+    $float = (float)$out[0][0];
+    $int   = (int)$out[0][0];
+    $result = ((float)$int === $float) ? $int : $float;
+    return array(array('type'=>'number', 'data'=>$result), $i+strlen($out[0][0])-1);
 }
 
 function erl_parse_pid($string, $i){
     $out = array();
     if(!preg_match_all("/^<[0-9]+\.[0-9]+\.[0-9]+>/",substr($string, $i), $out)){
-	    throw new Exception("Unexpected symbol $l in $i");
+	    throw new Exception("Unexpected sequence in $i");
     }
     return array(array('type'=>'pid', 'data'=>$out[0][0]), $i+strlen($out[0][0])-1);
 }
