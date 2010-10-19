@@ -1,15 +1,17 @@
 <?php
 
+// just internal config function
 function erl_config($param){
     if($param === 'atom_string') return '_abcdefghijklmnopqrstuvwxyz';
     if($param === 'number_string') return '-0123456789.';
     return false;
 }
 
-function _log($string){
-    echo microtime(true)." $string\n";
-}
-
+/**
+ * internal function parses erlang term from $i position
+ * function looks at fist symbol and makes decision what kind of term it must parse
+ *
+ */
 function erl_parse_all($string, $i){
     $len = strlen($string);
     while($i < $len){
@@ -44,6 +46,9 @@ function erl_parse_all($string, $i){
     throw new Exception("Error while parsing term");
 }
 
+/**
+ * internal funtcion parses "square bracket list" from $i position of string
+ */
 function erl_parse_list($string, $i){
     $sb_started  = false; // square_bracket
     $list = array();
@@ -74,6 +79,9 @@ function erl_parse_list($string, $i){
     throw new Exception("Error while parsing list");
 }
 
+/**
+ * internal function parses "quoted list from $i position of string"
+ */
 function erl_parse_quoted_list($string, $i){
     $started  = false;
     $escape = false;
@@ -107,6 +115,9 @@ function erl_parse_quoted_list($string, $i){
     throw new Exception("Error while parsing quoted list");
 }
 
+/**
+ * internal function parses tuple from $i position of string
+ */
 function erl_parse_tuple($string, $i){
     $started  = false; // 
     $list = array();
@@ -137,6 +148,9 @@ function erl_parse_tuple($string, $i){
     throw new Exception("Error while parsing tuple");
 }
 
+/**
+ * internal function parses atom from $i position of string
+ */
 function erl_parse_atom($string, $i){
     $atom = '';
     $len = strlen($string);
@@ -155,7 +169,9 @@ function erl_parse_atom($string, $i){
     throw new Exception("Error while parsing quoted atom");
 }
 
-
+/**
+ * internal function parses int or float from $i position of string
+ */
 function erl_parse_number($string, $i){
     $substr = substr($string, $i);
     $number_regexp = '/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/';
@@ -169,6 +185,9 @@ function erl_parse_number($string, $i){
     return array($result, $i+strlen($out[0][0])-1);
 }
 
+/**
+ * internal function parses pid from $i position of string
+ */
 function erl_parse_pid($string, $i){
     $out = array();
     if(!preg_match_all("/^<[0-9]+\.[0-9]+\.[0-9]+>/",substr($string, $i), $out)){
@@ -178,7 +197,9 @@ function erl_parse_pid($string, $i){
 }
 
 
-
+/**
+ * public function recurrently goes by resulted term and replaces "stringable" lists to strings
+ */
 function erl_list2string($node){
     if(!is_array($node)){return $node;}
     if($node['type'] === 'tuple'){
@@ -194,7 +215,7 @@ function erl_list2string($node){
 	        $possible_string .= chr($subnode);
 	    }
 	}
-	if($is_string){
+	if($is_string && strlen($possible_string) > 0){
 	    $node = $possible_string;
 	} else {
 	    $new_data = array();
@@ -206,6 +227,9 @@ function erl_list2string($node){
 }
 
 
+/**
+ * public function to parse string into term
+ */
 function erl_parse_term($term_string){
     list($result, $offset) = erl_parse_all($term_string, 0);
     return $result;
