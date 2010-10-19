@@ -20,8 +20,8 @@ function erl_parse_all($string, $i){
 	case $l === '[': // list
 	    return erl_parse_list($string, $i);
 	    break;
-	case $l === '{': // term
-	    return erl_parse_term($string, $i);
+	case $l === '{': // tuple
+	    return erl_parse_tuple($string, $i);
 	    break;
 	case $l === '<': // pid
 	    return erl_parse_pid($string, $i);
@@ -69,7 +69,7 @@ function erl_parse_list($string, $i){
     }
 }
 
-function erl_parse_term($string, $i){
+function erl_parse_tuple($string, $i){
     $started  = false; // 
     $list = array();
     $len = strlen($string);
@@ -88,7 +88,7 @@ function erl_parse_term($string, $i){
 	    list($list[], $i) = erl_parse_all($string, $i+1);
 	    continue;
 	case $l === '}' && $started:
-	    return array(array('type'=>'term', 'data'=>$list), $i);
+	    return array(array('type'=>'tuple', 'data'=>$list), $i);
 	    break;
 	default:
 	    throw new Exception("Unexpected symbol $l in $i");
@@ -145,7 +145,7 @@ function erl_parse_pid($string, $i){
 
 function erl_list2string($node){
     if(!is_array($node)){return $node;}
-    if($node['type'] === 'term'){
+    if($node['type'] === 'tuple'){
 	$new_data = array();
 	foreach($node['data'] as $subnode) $new_data[] = erl_list2string($subnode);
 	$node['data'] = $new_data;
@@ -171,4 +171,7 @@ function erl_list2string($node){
 }
 
 
-
+function erl_parse_term($term_string){
+    list($result, $offset) = erl_parse_all($term_string, 0);
+    return $result;
+}
