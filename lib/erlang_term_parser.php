@@ -1,7 +1,7 @@
 <?php
 /*
     @author Alexxz    
-    @project_url http://code.google.com/p/erlang-term-php-parser/
+    @project_url https://github.com/Alexxz/Erlang-term-php-parser
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 function erl_config($param){
     if($param === 'atom_string') return '_abcdefghijklmnopqrstuvwxyz';
     if($param === 'number_string') return '-0123456789.';
+    if($param === 'spaces') return " \t\r\n";
     return false;
 }
 
@@ -35,7 +36,7 @@ function erl_parse_all($string, $i){
     while($i < $len){
     	$l = $string[$i];
     	switch(true){
-    	case in_array($l, array(' ', "\n")): // stuff
+    	case false !== strpos(erl_config('spaces'), $l):
     	    break;
     	case $l === '[': // list
     	    return erl_parse_list($string, $i);
@@ -75,6 +76,8 @@ function erl_parse_list($string, $i){
 	    $l = $string[$i]; // letter
     	$n = ($i+1) < $len ? $string[$i+1] : false; // next letter
     	switch(true){
+    	case false !== strpos(erl_config('spaces'), $l):
+    	    break;
     	case $l === '[' && !$sb_started && $n === ']':
     	    $sb_started = true;
     	    break;
@@ -144,6 +147,8 @@ function erl_parse_tuple($string, $i){
     	$l = $string[$i];
     	$n = ($i+1) < $len ? $string[$i+1] : false; // next letter
     	switch(true){
+    	case false !== strpos(erl_config('spaces'), $l):
+    	    break;
        	case $l === '{' && !$started && $n === '}':
     	    $started = true;
     	    break;

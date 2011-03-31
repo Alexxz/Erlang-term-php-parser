@@ -1,7 +1,7 @@
 <?php
 /*
     @author Alexxz
-    @project_url http://code.google.com/p/erlang-term-php-parser/
+    @project_url https://github.com/Alexxz/Erlang-term-php-parser
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,6 +53,28 @@ $tests = array(
                 array('type' => 'list',  'data' => array()),
                 array('type' => 'list',  'data' => array()),
                 array('type' => 'list',  'data' => array(48,49,50)),
+                ),
+            ),
+        ),
+    'tuples' => array(
+        'type'   => 'simple',
+        'source' => '{{},{1,2}}',
+        'result' => array(
+            'type' => 'tuple', 
+            'data' => array(
+                array('type' => 'tuple',  'data' => array()),
+                array('type' => 'tuple',  'data' => array(1,2)),
+                ),
+            ),
+        ),
+    'spaces' => array(
+        'type'   => 'simple',
+        'source' => '{ {} , [ 1 , 2 ] }',
+        'result' => array(
+            'type' => 'tuple', 
+            'data' => array(
+                array('type' => 'tuple',  'data' => array()),
+                array('type' => 'list',  'data' => array(1,2)),
                 ),
             ),
         ),
