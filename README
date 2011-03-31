@@ -1,0 +1,2 @@
+Erlang-term-php-parser is the simple PHP script for parsing Erlang terms.
+Initially it is was created for working with MUC settings of Ejabberd.
