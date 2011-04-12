@@ -26,6 +26,21 @@ function erl_config($param){
     return false;
 }
 
+
+// returns next non spaced symbol
+function erl_skip_unsignificant_symbols($string, $i){
+    $len = strlen($string);
+    while($i < $len){
+    	$l = $string[$i];
+        if(false !== strpos(erl_config('spaces'), $l)){
+            $i++;
+            continue;
+        }
+        break;
+    }
+    return $i;
+}
+
 /**
  * internal function parses erlang term from $i position
  * function looks at fist symbol and makes decision what kind of term it must parse
@@ -74,7 +89,8 @@ function erl_parse_list($string, $i){
     $len = strlen($string);
     while($i < $len){
 	    $l = $string[$i]; // letter
-    	$n = ($i+1) < $len ? $string[$i+1] : false; // next letter
+        $significant_symbol = erl_skip_unsignificant_symbols($string, $i+1);
+    	$n = $significant_symbol < $len ? $string[$significant_symbol] : false; // next letter
     	switch(true){
     	case false !== strpos(erl_config('spaces'), $l):
     	    break;
@@ -124,7 +140,6 @@ function erl_parse_quoted_list($string, $i){
             break;
         case $l === '"' && $started:
     	    return array(array('type'=>'list', 'data'=>$list), $i);
-            var_dump($list);
     	    break;
         default:
             $list[] = ord($l);
@@ -145,7 +160,8 @@ function erl_parse_tuple($string, $i){
     $len = strlen($string);
     while($i < $len){
     	$l = $string[$i];
-    	$n = ($i+1) < $len ? $string[$i+1] : false; // next letter
+        $significant_symbol = erl_skip_unsignificant_symbols($string, $i+1);
+    	$n = $significant_symbol < $len ? $string[$significant_symbol] : false; // next letter
     	switch(true){
     	case false !== strpos(erl_config('spaces'), $l):
     	    break;

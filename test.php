@@ -46,24 +46,26 @@ $tests = array(
         ),
     'lists' => array(
         'type'   => 'simple',
-        'source' => '[[],"","012"]',
+        'source' => '[[],"","012", [ ] ]',
         'result' => array(
             'type' => 'list', 
             'data' => array(
                 array('type' => 'list',  'data' => array()),
                 array('type' => 'list',  'data' => array()),
                 array('type' => 'list',  'data' => array(48,49,50)),
+                array('type' => 'list',  'data' => array()),
                 ),
             ),
         ),
     'tuples' => array(
         'type'   => 'simple',
-        'source' => '{{},{1,2}}',
+        'source' => '{{},{1,2} , { }}',
         'result' => array(
             'type' => 'tuple', 
             'data' => array(
                 array('type' => 'tuple',  'data' => array()),
                 array('type' => 'tuple',  'data' => array(1,2)),
+                array('type' => 'tuple',  'data' => array()),
                 ),
             ),
         ),
@@ -79,7 +81,8 @@ $tests = array(
             ),
         ),
     'exception tuple' => array('type'   => 'exception', 'source' => '{', 'result' => 'Error while parsing term',),
-    'exception list'  => array('type'   => 'exception', 'source' => '[', 'result' => 'Error while parsing term',),
+    'exception list 1'  => array('type'   => 'exception', 'source' => '[',  'result' => 'Error while parsing term',),
+    'exception list 2'  => array('type'   => 'exception', 'source' => '[ ', 'result' => 'Error while parsing term',),
     'exception list tuple' => array('type'   => 'exception', 'source' => '[{', 'result' => 'Error while parsing term',),
     'exception tuple 1' => array('type'   => 'exception', 'source' => '{"','result' => 'Error while parsing quoted list',),
     'exception tuple 2' => array('type'   => 'exception', 'source' => '{""','result' => 'Error while parsing tuple',),
